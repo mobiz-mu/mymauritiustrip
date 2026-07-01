@@ -1,9 +1,9 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import PublicShell from '@/components/public/PublicShell';
 
 export const metadata = {
   title: 'Terms of Use | MyMauritiusTrip',
-  description: 'The terms governing your use of MyMauritiusTrip.com — bookings, pay-on-arrival, provider obligations, and on-platform communication.',
+  description: 'The terms governing your use of MyMauritiusTrip.com â€” bookings, pay-on-arrival, provider obligations, and on-platform communication.',
 };
 
 const UPDATED = 'Last updated: 1 July 2026';
@@ -43,7 +43,7 @@ export default function Page() {
           </p>
 
           <Section n="1" title="Who we are and what we do">
-            <p>The Platform is an online marketplace that connects travellers with verified local tourism providers in Mauritius — stays, car rental, taxis and private drivers, airport transfers, catamaran and boat trips, restaurants and experiences. We facilitate discovery and booking requests; the underlying services are provided by independent third-party providers, not by us.</p>
+            <p>The Platform is an online marketplace that connects travellers with verified local tourism providers in Mauritius â€” stays, car rental, taxis and private drivers, airport transfers, catamaran and boat trips, restaurants and experiences. We facilitate discovery and booking requests; the underlying services are provided by independent third-party providers, not by us.</p>
           </Section>
           <Section n="2" title="Definitions">
             <p>&ldquo;Provider&rdquo; means a business listing services on the Platform. &ldquo;Traveller&rdquo; (or &ldquo;you&rdquo;) means a person browsing or booking through the Platform. &ldquo;Listing&rdquo; means a service offered by a Provider. &ldquo;Booking&rdquo; means a request to reserve a Listing.</p>
@@ -52,16 +52,16 @@ export default function Page() {
             <p>You must be at least 18 years old to create an account or make a Booking. You are responsible for the accuracy of the information you provide, for keeping your login credentials secure, and for activity under your account.</p>
           </Section>
           <Section n="4" title="Bookings and pay-on-arrival">
-            <p>A Booking is a request that a Provider may accept or decline. Unless stated otherwise, payment is made directly to the Provider on arrival — no card payment is taken by the Platform at booking time. Prices are shown in Mauritian Rupees (MUR) and may be subject to local taxes or fees set by the Provider. The contract for the underlying service is between you and the Provider.</p>
+            <p>A Booking is a request that a Provider may accept or decline. Unless stated otherwise, payment is made directly to the Provider on arrival â€” no card payment is taken by the Platform at booking time. Prices are shown in Mauritian Rupees (MUR) and may be subject to local taxes or fees set by the Provider. The contract for the underlying service is between you and the Provider.</p>
           </Section>
           <Section n="5" title="On-platform communication">
             <p>All communication relating to a Booking should stay on the Platform or with our support team. Provider contact details are not shared publicly. Do not attempt to arrange payment or contact off-platform to circumvent the Platform; doing so may result in suspension and removes the protections the Platform provides.</p>
           </Section>
           <Section n="6" title="Provider obligations">
-            <p>Providers must be verified before listing, may hold up to seven active Listings, must describe services accurately, honour accepted Bookings, comply with applicable Mauritian law and licensing, and pay the applicable commission. Providers are solely responsible for the services they deliver.</p>
+            <p>Providers must be verified before listing, may hold up to seven active Listings, must describe services accurately, honour accepted Bookings, comply with applicable Mauritian law and licensing, and follow the provider agreement terms. Providers are solely responsible for the services they deliver.</p>
           </Section>
-          <Section n="7" title="Fees and commission">
-            <p>Providers pay a one-time verification fee and a commission on completed Bookings, plus any optional premium placement fees, as communicated during onboarding. Travellers do not pay a separate Platform fee to browse or request Bookings.</p>
+          <Section n="7" title="Provider fees and platform rules">
+            <p>Providers may be subject to verification fees, premium placement fees, and provider agreement terms as communicated during onboarding. Travellers do not pay a separate Platform fee to browse or request Bookings.</p>
           </Section>
           <Section n="8" title="Reviews">
             <p>Reviews may be submitted by travellers who completed a Booking and must be honest and lawful. We may remove content that is abusive, misleading, or violates these Terms. Reviews reflect the views of their authors, not us.</p>
@@ -88,9 +88,10 @@ export default function Page() {
             <p>Questions about these Terms? Contact us on WhatsApp at +230 5506 8119 or by email at info@mymauritiustrip.com.</p>
           </Section>
 
-          <Link href="/" className="mt-8 inline-block rounded-full bg-ocean px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#095a96]">← Back to home</Link>
+          <Link href="/" className="mt-8 inline-block rounded-full bg-ocean px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#095a96]">â† Back to home</Link>
         </div>
       </main>
     </PublicShell>
   );
 }
+

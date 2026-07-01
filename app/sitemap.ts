@@ -7,6 +7,8 @@ const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 const ROUTES = [
   '',
   '/search',
+  '/about-mauritius',
+  '/contact',
   '/request-transfer',
   '/terms',
   '/privacy',

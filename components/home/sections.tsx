@@ -260,7 +260,7 @@ export function ProviderBand() {
         </div>
         <Scene src="/home/hero-boat.svg" className="min-h-[200px]">
           <div className="absolute inset-0 flex flex-col justify-end gap-2 p-6">
-            {[['shield', 'Verified, trusted marketplace'], ['star', 'Up to 7 listings per business'], ['chat', 'Booking requests in one dashboard'], ['wallet', 'Pay-on-arrival · 15% commission']].map(([ic, tx]) => (
+            {[['shield', 'Verified, trusted marketplace'], ['star', 'Up to 7 listings per business'], ['chat', 'Booking requests in one dashboard'], ['wallet', 'Pay-on-arrival model']].map(([ic, tx]) => (
               <span key={tx} className="inline-flex items-center gap-2 rounded-lg bg-white/92 px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm">
                 <Icon name={ic as IconKey} size={15} className="text-ocean" /> {tx}
               </span>

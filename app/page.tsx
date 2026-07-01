@@ -21,7 +21,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'MyMauritiusTrip.com — Villas, transfers, cruises & experiences in Mauritius',
+  title: { absolute: 'MyMauritiusTrip.com — Villas, transfers, cruises & experiences in Mauritius' },
   description:
     'Book villas, car rental, taxis, catamaran cruises, restaurants and things to do in Mauritius from verified local providers. Pay on arrival, local support, all in one place.',
   openGraph: {

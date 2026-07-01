@@ -26,6 +26,8 @@ export default function PublicFooter() {
             {HOME_CATEGORIES.slice(0, 6).map((c) => (
               <li key={c.title}><Link href={c.href} className="hover:text-white hover:underline">{c.title}</Link></li>
             ))}
+            <li><Link href="/about-mauritius" className="hover:text-white hover:underline">About Mauritius</Link></li>
+            <li><Link href="/contact" className="hover:text-white hover:underline">Contact us</Link></li>
             <li><Link href="/search" className="font-medium text-white hover:underline">All experiences →</Link></li>
           </ul>
         </div>
@@ -55,7 +57,20 @@ export default function PublicFooter() {
       <div className="border-t border-white/15">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-5 text-xs text-white/75 sm:flex-row">
           <p>© {new Date().getFullYear()} MyMauritiusTrip.com — All communication stays on-platform.</p>
-          <p>Made in Mauritius 🇲🇺</p>
+          <p className="inline-flex items-center gap-1.5">
+            Designed &amp; built by{' '}
+            <a href="https://mobiz.mu" target="_blank" rel="noopener noreferrer" className="font-semibold text-white hover:underline">Mobiz.mu</a>
+            <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
+              <defs>
+                <linearGradient id="mmtHeart" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#ff6b6b" />
+                  <stop offset="1" stopColor="#e11d2a" />
+                </linearGradient>
+              </defs>
+              <path d="M12 20s-6-3.8-6-8a3.4 3.4 0 016-2.2A3.4 3.4 0 0118 12c0 4.2-6 8-6 8z" fill="url(#mmtHeart)" />
+              <path d="M9 8.6a2.2 2.2 0 011.6 1" stroke="rgba(255,255,255,0.7)" strokeWidth="1.1" strokeLinecap="round" fill="none" />
+            </svg>
+          </p>
         </div>
       </div>
     </footer>

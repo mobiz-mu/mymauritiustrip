@@ -1,6 +1,9 @@
-import { notFound } from 'next/navigation';
+﻿import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getListingDetail } from '@/lib/public/catalog';
+import { SITE, canonical } from '@/lib/seo/site';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { productLd, breadcrumbLd } from '@/lib/seo/jsonld';
 import { WHATSAPP, SUPPORT_EMAIL } from '@/components/public/PublicHeader';
 import SiteHeader from '@/components/public/SiteHeader';
 import PublicFooter from '@/components/public/PublicFooter';
@@ -9,10 +12,43 @@ import { Badges, Stars, formatMUR, priceUnitLabel } from '@/components/public/ui
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Listing | MyMauritiusTrip',
-  description: 'Book stays, transfers, cruises, cars, restaurants and experiences across Mauritius.',
+type SeoMedia = {
+  is_cover?: boolean | null;
+  full_url?: string | null;
+  gallery_url?: string | null;
+  preview_url?: string | null;
+  poster_url?: string | null;
 };
+
+function coverImage(images: SeoMedia[] | undefined): string {
+  const cover = images?.find((m) => Boolean(m.is_cover)) ?? images?.[0];
+  return (
+    cover?.full_url ??
+    cover?.gallery_url ??
+    cover?.preview_url ??
+    cover?.poster_url ??
+    SITE.ogImage
+  );
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getListingDetail(slug);
+  if (!data) return { title: 'Listing not found' };
+  const { listing: l, categoryName, locationName, images } = data;
+  const title = `${l.title}${locationName ? ` â€” ${locationName}` : ''}, Mauritius`;
+  const description = String(l.description ?? SITE.description).replace(/\s+/g, ' ').trim().slice(0, 160);
+  const url = canonical(`/listings/${l.slug}`);
+  const image = coverImage(images);
+  return {
+    title: { absolute: `${title} | ${SITE.name}` },
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: 'website', siteName: SITE.name, images: [{ url: image }] },
+    twitter: { card: 'summary_large_image', title, description, images: [image] },
+    other: { 'og:category': categoryName ?? 'Mauritius' },
+  };
+}
 
 // Dynamic route: nothing is prerendered at build; every listing renders on
 // demand at request time. The empty generateStaticParams makes "Collecting page
@@ -54,10 +90,30 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <SiteHeader />
+      <JsonLd
+        data={[
+          productLd({
+            name: l.title,
+            description: String(l.description ?? SITE.description).replace(/\s+/g, ' ').trim().slice(0, 300),
+            slug: l.slug,
+            image: coverImage(images),
+            price: l.base_price_mur,
+            ratingValue: l.rating_avg,
+            reviewCount: l.review_count,
+            category: categoryName,
+            brand: l.business_name,
+          }),
+          breadcrumbLd([
+            { name: 'Home', path: '/' },
+            { name: categoryName ?? 'Listings', path: '/search' },
+            { name: l.title, path: `/listings/${l.slug}` },
+          ]),
+        ]}
+      />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 space-y-6">
         <div>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500">{categoryName} · {locationName ?? 'Mauritius'}</p>
+            <p className="text-xs text-slate-500">{categoryName} Â· {locationName ?? 'Mauritius'}</p>
             <Badges verified={verified} premium={l.is_premium} featured={l.is_featured} />
           </div>
           <h1 className="mt-1 font-serif text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">{l.title}</h1>
@@ -115,7 +171,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <div className="space-y-3">
                   {reviews.map((r) => (
                     <div key={r.id} className="rounded-xl bg-white p-3 ring-1 ring-slate-200">
-                      <p className="text-sm"><span className="text-gold">★</span> {r.rating}/5 <span className="text-xs text-slate-400">· Verified guest</span></p>
+                      <p className="text-sm"><span className="text-gold">â˜…</span> {r.rating}/5 <span className="text-xs text-slate-400">Â· Verified guest</span></p>
                       {r.comment && <p className="mt-1 text-sm text-slate-700">{r.comment}</p>}
                       {r.reply && (
                         <div className="mt-2 rounded-lg bg-slate-50 p-2 text-sm">
@@ -142,12 +198,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               >
                 Request to Book
               </a>
-              <p className="mt-2 text-center text-xs text-slate-400">Pay on arrival · no card needed now.</p>
+              <p className="mt-2 text-center text-xs text-slate-400">Pay on arrival Â· no card needed now.</p>
             </div>
 
             <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
               <p className="text-sm font-medium text-slate-700">Offered by</p>
-              <p className="text-sm text-slate-900">{l.business_name} {verified && <span className="text-ocean">✓</span>}</p>
+              <p className="text-sm text-slate-900">{l.business_name} {verified && <span className="text-ocean">âœ“</span>}</p>
               <p className="mt-3 text-xs text-slate-500">Need help choosing?</p>
               <a
                 href={`https://wa.me/${WHATSAPP}`}
@@ -174,3 +230,4 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     </div>
   );
 }
+
