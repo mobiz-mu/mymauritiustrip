@@ -5,6 +5,7 @@ import { WHATSAPP, SUPPORT_EMAIL } from '@/components/public/PublicHeader';
 import { formatMUR } from '@/components/public/ui';
 import { HOME_CATEGORIES, VALUE_PROPS, TRIP_SERVICES, type IconKey } from '@/lib/home/content';
 import { Icon } from './icons';
+import HeroPanels from './HeroPanels';
 
 type Ref = { slug: string; name: string };
 
@@ -43,8 +44,9 @@ function Heading({ eyebrow, title, subtitle, href }: { eyebrow?: string; title: 
 /* ---------------------------------------------------------------- Hero */
 export function HomeHero({ categories, locations }: { categories: Ref[]; locations: Ref[] }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#eaf5fb] via-[#f5fafd] to-white">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#fff3da] via-[#eaf5fb] to-white">
       <div className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full bg-turquoise/20 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute left-1/2 top-[-6rem] h-72 w-72 -translate-x-1/2 rounded-full bg-amber-200/40 blur-3xl" aria-hidden="true" />
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 md:pb-16 md:pt-14">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           {/* copy */}
@@ -61,7 +63,7 @@ export function HomeHero({ categories, locations }: { categories: Ref[]; locatio
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link href="/search" className="rounded-full bg-ocean px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#095a96]">Explore Mauritius</Link>
               <Link href="/request-transfer" className="rounded-full bg-gold px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:brightness-105">Request a custom trip</Link>
-              <Link href="/provider-signup" className="rounded-full border-2 border-ocean px-5 py-3 text-sm font-semibold text-ocean transition hover:bg-ocean/5">List your business</Link>
+              <Link href="/provider-signup" className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">List your business</Link>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
               <Pill>Verified local providers</Pill>
@@ -70,18 +72,8 @@ export function HomeHero({ categories, locations }: { categories: Ref[]; locatio
             </div>
           </div>
 
-          {/* image collage */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <Scene src="/home/hero-villa.svg" className="row-span-2 h-full min-h-[260px] rounded-3xl shadow-lg sm:min-h-[340px]">
-              <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-800">Beachfront villas</span>
-            </Scene>
-            <Scene src="/home/hero-boat.svg" className="h-[122px] rounded-3xl shadow-lg sm:h-[160px]">
-              <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-800">Catamaran days</span>
-            </Scene>
-            <Scene src="/home/hero-beach.svg" className="h-[122px] rounded-3xl shadow-lg sm:h-[160px]">
-              <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-800">Island experiences</span>
-            </Scene>
-          </div>
+          {/* rotating square image panels */}
+          <HeroPanels />
         </div>
 
         {/* search panel */}

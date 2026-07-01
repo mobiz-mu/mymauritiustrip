@@ -269,3 +269,50 @@ export async function getListingDetail(slug: string) {
     reviews: reviewsWithReplies,
   };
 }
+
+export type PublicReview = {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  reply_body: string | null;
+  listingTitle: string | null;
+  listingSlug: string | null;
+};
+
+// Latest approved public reviews for the homepage testimonials section.
+// Reads reviews_public (approved + published + verified only). No reviewer
+// identity is exposed by the view, so we attribute to "Verified traveller".
+export async function getLatestReviews(limit = 9): Promise<PublicReview[]> {
+  if (isBuildPhase()) return [];
+  const supabase = await createClient();
+  const { data: reviews } = await supabase
+    .from('reviews_public')
+    .select('id, listing_id, rating, comment, created_at, reply_body')
+    .not('comment', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  const rows = reviews ?? [];
+  const listingIds = Array.from(new Set(rows.map((r) => r.listing_id).filter(Boolean)));
+  const titleById = new Map<string, { title: string; slug: string }>();
+  if (listingIds.length > 0) {
+    const { data: listings } = await supabase
+      .from('listings_public')
+      .select('id, title, slug')
+      .in('id', listingIds);
+    for (const l of listings ?? []) titleById.set(l.id, { title: l.title, slug: l.slug });
+  }
+
+  return rows
+    .filter((r) => typeof r.comment === 'string' && r.comment.trim().length > 0)
+    .map((r) => ({
+      id: r.id,
+      rating: r.rating,
+      comment: r.comment,
+      created_at: r.created_at,
+      reply_body: r.reply_body ?? null,
+      listingTitle: titleById.get(r.listing_id)?.title ?? null,
+      listingSlug: titleById.get(r.listing_id)?.slug ?? null,
+    }));
+}
