@@ -7,6 +7,7 @@ import {
   BUCKETS,
   MAX_UPLOAD_BYTES,
   ALLOWED_UPLOAD_TYPES,
+  CONTRACT_MAX_BYTES,
   buildObjectPath,
 } from '@/lib/storage/paths';
 
@@ -102,4 +103,35 @@ export async function submitVerification(_prev: PrevState, _formData: FormData):
   if (error) return { error: error.message };
   revalidatePath('/provider/verification');
   return { success: 'Submitted for review. We will update your status shortly.' };
+}
+
+// ---- Upload the signed provider contract (PDF only) ----
+export async function uploadContract(_prev: PrevState, formData: FormData): Promise<Result> {
+  const { supabase, business } = await getOwnBusiness();
+  if (!business) return { error: 'No business found for your account.' };
+
+  const file = formData.get('file') as File | null;
+  if (!file || file.size === 0) return { error: 'Please choose your signed contract PDF.' };
+  if (file.type !== 'application/pdf') return { error: 'The contract must be a PDF file.' };
+  if (file.size > CONTRACT_MAX_BYTES) return { error: 'File too large (max 10 MB).' };
+
+  const path = buildObjectPath(business.id, file.name);
+  const { error: upErr } = await supabase.storage
+    .from(BUCKETS.providerContracts)
+    .upload(path, file, { upsert: false, contentType: 'application/pdf' });
+  if (upErr) return { error: `Upload failed: ${upErr.message}` };
+
+  const { error: insErr } = await supabase.from('provider_contracts').insert({
+    business_id: business.id,
+    storage_path: path,
+    original_filename: file.name.slice(0, 200),
+    mime_type: 'application/pdf',
+    size_bytes: file.size,
+    status: 'pending',
+  });
+  if (insErr) return { error: insErr.message };
+
+  revalidatePath('/provider/verification');
+  revalidatePath('/provider');
+  return { success: 'Signed contract uploaded. Pending admin review.' };
 }

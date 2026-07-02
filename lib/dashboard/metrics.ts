@@ -42,6 +42,11 @@ export type AdminMetrics = {
   newsletter: number;
   transfers: number;
   transfersOpen: number;
+  contractsPending: number;
+  contractsRejected: number;
+  contractsMissing: number;
+  launchPremiumAwarded: number;
+  premiumExpiringSoon: number;
   recentBusinesses: { business_name: string; status: string; created_at: string }[];
   recentListings: { title: string; status: string; created_at: string }[];
 };
@@ -53,7 +58,9 @@ export function emptyAdminMetrics(): AdminMetrics {
     bookingsConfirmed: 0, bookingsCompleted: 0, bookingsCancelled: 0,
     verificationsPending: 0, paymentProofsPending: 0, commissionsUnpaid: 0,
     commissionsOverdue: 0, reviews: 0, reviewsPending: 0, newsletter: 0,
-    transfers: 0, transfersOpen: 0, recentBusinesses: [], recentListings: [],
+    transfers: 0, transfersOpen: 0, contractsPending: 0, contractsRejected: 0,
+    contractsMissing: 0, launchPremiumAwarded: 0, premiumExpiringSoon: 0,
+    recentBusinesses: [], recentListings: [],
   };
 }
 
@@ -69,7 +76,9 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     verificationsPending, paymentProofsPending,
     commissionsUnpaid, commissionsOverdue,
     reviews, reviewsPending, newsletter, transfers, transfersOpen,
+    contractsPending, contractsRejected, launchPremiumAwarded, premiumExpiringSoon,
     recentBiz, recentLst,
+    verifiedBizIds, contractBizIds,
   ] = await Promise.all([
     c('profiles', (q) => q.eq('role', 'client')),
     c('profiles', (q) => q.eq('role', 'provider')),
@@ -92,9 +101,19 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     c('newsletter_subscribers'),
     c('transfer_requests'),
     c('transfer_requests', (q) => q.in('status', ['new', 'reviewing', 'quoted'])),
+    c('provider_contracts', (q) => q.eq('status', 'pending')),
+    c('provider_contracts', (q) => q.eq('status', 'rejected')),
+    c('listings', (q) => q.eq('premium_source', 'launch_free')),
+    c('listings', (q) => q.eq('premium_source', 'launch_free').eq('is_premium', true).gt('premium_expires_at', new Date().toISOString()).lt('premium_expires_at', new Date(Date.now() + 7 * 864e5).toISOString())),
     supabase.from('businesses').select('business_name, status, created_at').order('created_at', { ascending: false }).limit(5),
     supabase.from('listings').select('title, status, created_at').order('created_at', { ascending: false }).limit(5),
+    supabase.from('businesses').select('id').eq('status', 'verified'),
+    supabase.from('provider_contracts').select('business_id'),
   ]);
+
+  // Verified businesses with no contract row at all.
+  const withContract = new Set((contractBizIds.data ?? []).map((r: { business_id: string }) => r.business_id));
+  const contractsMissing = (verifiedBizIds.data ?? []).filter((b: { id: string }) => !withContract.has(b.id)).length;
 
   return {
     customers, providers, businesses, listings,
@@ -102,6 +121,7 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     bookings, bookingsPending, bookingsConfirmed, bookingsCompleted, bookingsCancelled,
     verificationsPending, paymentProofsPending, commissionsUnpaid, commissionsOverdue,
     reviews, reviewsPending, newsletter, transfers, transfersOpen,
+    contractsPending, contractsRejected, contractsMissing, launchPremiumAwarded, premiumExpiringSoon,
     recentBusinesses: (recentBiz.data as AdminMetrics['recentBusinesses']) ?? [],
     recentListings: (recentLst.data as AdminMetrics['recentListings']) ?? [],
   };
@@ -122,6 +142,10 @@ export type ProviderMetrics = {
   avgRating: number;
   commissionsUnpaid: number;
   commissionsOverdue: number;
+  contractStatus: string | null;
+  premiumActive: boolean;
+  premiumExpiresAt: string | null;
+  premiumSource: string | null;
   recentBookings: { reference: string | null; status: string; created_at: string }[];
 };
 
@@ -129,7 +153,9 @@ export async function getProviderMetrics(ownerId: string): Promise<ProviderMetri
   const empty: ProviderMetrics = {
     business: null, listings: 0, listingsPublished: 0, listingsPending: 0, listingsPremium: 0,
     bookings: 0, bookingsPending: 0, bookingsAccepted: 0, bookingsCompleted: 0, bookingsCancelled: 0,
-    reviews: 0, avgRating: 0, commissionsUnpaid: 0, commissionsOverdue: 0, recentBookings: [],
+    reviews: 0, avgRating: 0, commissionsUnpaid: 0, commissionsOverdue: 0,
+    contractStatus: null, premiumActive: false, premiumExpiresAt: null, premiumSource: null,
+    recentBookings: [],
   };
   if (isBuildPhase()) return empty;
   const supabase = await createClient();
@@ -147,7 +173,7 @@ export async function getProviderMetrics(ownerId: string): Promise<ProviderMetri
   // RLS-restricted to the review's own client / admin) from the provider side.
   const { data: listingRows } = await supabase
     .from('listings')
-    .select('rating_avg, review_count')
+    .select('rating_avg, review_count, is_premium, premium_source, premium_expires_at')
     .eq('business_id', bid);
 
   const c = (t: string, b?: (q: any) => any) => countRows(supabase, t, b);
@@ -181,11 +207,35 @@ export async function getProviderMetrics(ownerId: string): Promise<ProviderMetri
   }
   const avgRating = weight > 0 ? Math.round((sum / weight) * 10) / 10 : 0;
 
+  // Premium summary: active = flagged and not expired; soonest active expiry.
+  const now = Date.now();
+  const activePremium = (listingRows ?? []).filter(
+    (l: any) => l.is_premium && (!l.premium_expires_at || new Date(l.premium_expires_at).getTime() > now),
+  );
+  const premiumActive = activePremium.length > 0;
+  const expiries = activePremium
+    .map((l: any) => l.premium_expires_at)
+    .filter(Boolean)
+    .map((d: string) => new Date(d).getTime());
+  const premiumExpiresAt = expiries.length ? new Date(Math.min(...expiries)).toISOString() : null;
+  const premiumSource = (activePremium.find((l: any) => l.premium_source) as any)?.premium_source ?? null;
+
+  // Latest contract status for this business.
+  const { data: contractRow } = await supabase
+    .from('provider_contracts')
+    .select('status')
+    .eq('business_id', bid)
+    .order('uploaded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const contractStatus = (contractRow?.status as string) ?? null;
+
   return {
     business: business as ProviderMetrics['business'],
     listings, listingsPublished, listingsPending, listingsPremium,
     bookings, bookingsPending, bookingsAccepted, bookingsCompleted, bookingsCancelled,
     reviews, avgRating, commissionsUnpaid, commissionsOverdue,
+    contractStatus, premiumActive, premiumExpiresAt, premiumSource,
     recentBookings: (recentBk.data as ProviderMetrics['recentBookings']) ?? [],
   };
 }

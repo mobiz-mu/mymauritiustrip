@@ -61,6 +61,22 @@ export default async function ProviderDashboard() {
         <StatCard label="Avg rating" value={m.avgRating > 0 ? `${m.avgRating}★` : '—'} accent="gold" hint={`${m.reviews} review${m.reviews === 1 ? '' : 's'}`} href="/provider/reviews" />
       </StatGrid>
 
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <StatCard
+          label="Contract"
+          value={m.contractStatus ? m.contractStatus.charAt(0).toUpperCase() + m.contractStatus.slice(1) : 'Not uploaded'}
+          accent={m.contractStatus === 'approved' ? 'emerald' : m.contractStatus === 'rejected' ? 'red' : m.contractStatus === 'pending' ? 'gold' : 'slate'}
+          hint="Signed agreement"
+          href="/provider/verification"
+        />
+        <StatCard
+          label="Premium ads"
+          value={m.premiumActive ? 'Active' : '—'}
+          accent={m.premiumActive ? 'gold' : 'slate'}
+          hint={m.premiumExpiresAt ? `Until ${new Date(m.premiumExpiresAt).toLocaleDateString('en-GB')}${m.premiumSource === 'launch_free' ? ' · launch free' : ''}` : 'Not premium'}
+        />
+      </div>
+
       <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Bookings */}
         <SectionCard title="Bookings" action={<a href="/provider/bookings" className="text-xs font-semibold text-ocean hover:underline">Open →</a>}>

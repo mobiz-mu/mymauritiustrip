@@ -2,10 +2,13 @@ export const BUCKETS = {
   businessDocuments: 'business-documents',
   paymentProofs: 'payment-proofs',
   commissionProofs: 'commission-proofs',
+  providerContracts: 'provider-contracts',
 } as const;
 
 // Allowed upload types/size for verification artifacts.
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+export const CONTRACT_MAX_BYTES = 10 * 1024 * 1024; // 10 MB, PDF only
+export const CONTRACT_ALLOWED_TYPES = ['application/pdf'];
 export const ALLOWED_UPLOAD_TYPES = [
   'image/jpeg',
   'image/png',

@@ -40,6 +40,12 @@ export default async function AdminDashboard() {
         <AlertCard label="Reviews to moderate" value={m.reviewsPending} tone="warn" href="/admin/reviews" cta="Approve or reject reviews" />
         <AlertCard label="Overdue commissions" value={m.commissionsOverdue} tone="danger" href="/admin/commissions?status=overdue" cta="Chase overdue invoices" />
       </div>
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <AlertCard label="Contracts to review" value={m.contractsPending} tone="warn" href="/admin/contracts" cta="Review signed contracts" />
+        <AlertCard label="Missing contracts" value={m.contractsMissing} tone="warn" href="/admin/contracts" cta="Verified providers with no contract" />
+        <AlertCard label="Rejected contracts" value={m.contractsRejected} tone="danger" href="/admin/contracts" cta="Awaiting re-upload" />
+        <StatCard label="Launch-free premium" value={`${m.launchPremiumAwarded}/20`} accent="gold" hint={`${m.premiumExpiringSoon} expiring ≤ 7 days`} />
+      </div>
 
       <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Booking overview */}
@@ -121,6 +127,7 @@ export default async function AdminDashboard() {
             { href: '/admin/bookings', label: 'Bookings' },
             { href: '/admin/commissions', label: 'Commissions' },
             { href: '/admin/reviews', label: 'Review moderation' },
+            { href: '/admin/contracts', label: 'Provider contracts' },
             { href: '/admin/transfers', label: 'Taxi & transfers' },
             { href: '/admin/newsletter', label: 'Newsletter' },
           ]} />

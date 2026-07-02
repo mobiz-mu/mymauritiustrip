@@ -107,7 +107,11 @@ export async function searchListings(params: CatalogParams, forcedCategorySlugs?
   const ratingMin = Number(one(params.rating_min));
   if (Number.isFinite(ratingMin) && one(params.rating_min)) q = q.gte('rating_avg', ratingMin);
 
-  if (one(params.premium) === '1') q = q.eq('is_premium', true);
+  if (one(params.premium) === '1') {
+    // Premium, excluding expired launch-free grants (paid/manual have null expiry).
+    const nowIso = new Date().toISOString();
+    q = q.eq('is_premium', true).or(`premium_expires_at.is.null,premium_expires_at.gt.${nowIso}`);
+  }
   if (one(params.featured) === '1') q = q.eq('is_featured', true);
 
   const kw = one(params.q);
